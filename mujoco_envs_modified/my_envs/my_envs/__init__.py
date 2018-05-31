@@ -20,3 +20,10 @@ register(
     max_episode_steps=50,
     reward_threshold=-3.75,
 )
+
+register(
+    id='HalfCheetahModified-leg-v0',
+    entry_point='my_envs.envs:HalfCheetahEnv_modified_leg',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
