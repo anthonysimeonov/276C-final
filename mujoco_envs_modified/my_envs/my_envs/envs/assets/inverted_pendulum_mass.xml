@@ -1,4 +1,4 @@
-<mujoco model="inverted pendulum">
+<mujoco model="inverted_pendulum_mass">
 	<compiler inertiafromgeom="true"/>
 	<default>
 		<joint armature="0" damping="1" limited="true"/>
