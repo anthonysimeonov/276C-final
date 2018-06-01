@@ -20,3 +20,10 @@ register(
     max_episode_steps=50,
     reward_threshold=-3.75,
 )
+
+register(
+    id='InvertedPendulumModified-Mass',
+    entry_point='my_envs.envs:InvertedPendulumModifiedMassEnv',
+    max_episode_steps=50,
+    reward_threshold=-3.75,
+)
