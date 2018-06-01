@@ -1,2 +1,3 @@
 from my_envs.envs.reacher_springy import ReacherSpringyEnv
 from my_envs.envs.reacher_springy2 import ReacherSpringyEnv2
+from my_envs.envs.halfcheetah_modified_leg import HalfCheetahEnv_modified_leg 
