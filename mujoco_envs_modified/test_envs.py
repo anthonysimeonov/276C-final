@@ -96,6 +96,3 @@ while(1):
 		action = 5*(env.action_space.sample())
 		print(action)
 		observation,reward,done,_ = env.step(action)'''
-
-
-

@@ -1,3 +1,9 @@
 from my_envs.envs.reacher_springy import ReacherSpringyEnv
 from my_envs.envs.reacher_springy2 import ReacherSpringyEnv2
-from my_envs.envs.halfcheetah_modified_leg import HalfCheetahEnv_modified_leg 
+from my_envs.envs.halfcheetah_modified_leg import HalfCheetahEnv_modified_leg
+
+from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMassEnv
+from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedInertiaEnv
+from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedFrictionEnv
+from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedTiltEnv 
+from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMotorEnv 
