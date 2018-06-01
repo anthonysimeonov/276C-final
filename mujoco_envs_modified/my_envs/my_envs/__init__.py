@@ -64,6 +64,14 @@ id='InvertedPendulumModified-tilt-v10',
 )
 
 register(
+id='InvertedPendulumModified-motor-v10',
+    entry_point='my_envs.envs:InvertedPendulumModifiedMotorEnv',
+    max_episode_steps=1000,
+    reward_threshold=950,
+)
+
+
+register(
 id='InvertedPendulumModified-multi-v10',
     entry_point='my_envs.envs:InvertedPendulumModifiedMultiEnv',
     max_episode_steps=1000,
