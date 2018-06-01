@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Name: my-envs
+Version: 0.0.1
+Summary: Custom environments.
+Home-page: UNKNOWN
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Provides-Extra: all
+Provides-Extra: mujoco

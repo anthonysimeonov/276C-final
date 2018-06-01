@@ -1,0 +1,2 @@
+from my_envs.envs.reacher_springy import ReacherSpringyEnv
+from my_envs.envs.reacher_springy2 import ReacherSpringyEnv2
