@@ -9,7 +9,7 @@ xml_directory = str(os.path.dirname(os.path.realpath(__file__))) + '/assets/'
 class InvertedPendulumModifiedMassEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'inverted_pendulum_mass.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, xml_directory + 'inverted_pendulum_mass.xml', 2)
 
     def step(self, a):
         reward = 1.0

@@ -32,5 +32,26 @@ register(
     id='InvertedPendulumModified-mass-v0',
     entry_point='my_envs.envs:InvertedPendulumModifiedMassEnv',
     max_episode_steps=1000,
-    reward_threshold=4800,
+    reward_threshold=950,
+)
+
+register(
+    id='InvertedPendulumModified-inertia-v0',
+    entry_point='my_envs.envs:InvertedPendulumModifiedInertia',
+    max_episode_steps=1000,
+    reward_threshold=950,
+)
+
+register(
+id='InvertedPendulumModified-friction-v0',
+    entry_point='my_envs.envs:InvertedPendulumModifiedFrictionEnv',
+    max_episode_steps=1000,
+    reward_threshold=950,
+)
+
+register(
+id='InvertedPendulumModified-tilt-v0',
+    entry_point='my_envs.envs:InvertedPendulumModifiedTiltEnv',
+    max_episode_steps=1000,
+    reward_threshold=950,
 )
