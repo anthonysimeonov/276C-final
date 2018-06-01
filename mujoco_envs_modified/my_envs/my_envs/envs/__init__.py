@@ -7,3 +7,5 @@ from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedIner
 from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedFrictionEnv
 from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedTiltEnv 
 from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMotorEnv 
+from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMultiEnv 
+

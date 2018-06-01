@@ -22,43 +22,50 @@ register(
 )
 
 register(
-    id='HalfCheetahModified-leg-v0',
+    id='HalfCheetahModified-leg-v10',
     entry_point='my_envs.envs:HalfCheetahEnv_modified_leg',
     max_episode_steps=1000,
     reward_threshold=4800,
 )
 
 register(
-    id='InvertedPendulumModified-base-v0',
+    id='InvertedPendulumModified-base-v10',
+    entry_point='my_envs.envs:InvertedPendulumModifiedBaseEnv',
+    max_episode_steps=1000,
+    reward_threshold=950,
+)
+
+register(
+    id='InvertedPendulumModified-mass-v10',
     entry_point='my_envs.envs:InvertedPendulumModifiedMassEnv',
     max_episode_steps=1000,
     reward_threshold=950,
 )
 
 register(
-    id='InvertedPendulumModified-mass-v0',
-    entry_point='my_envs.envs:InvertedPendulumModifiedMassEnv',
-    max_episode_steps=1000,
-    reward_threshold=950,
-)
-
-register(
-    id='InvertedPendulumModified-inertia-v0',
+    id='InvertedPendulumModified-inertia-v10',
     entry_point='my_envs.envs:InvertedPendulumModifiedInertia',
     max_episode_steps=1000,
     reward_threshold=950,
 )
 
 register(
-id='InvertedPendulumModified-friction-v0',
+id='InvertedPendulumModified-friction-v10',
     entry_point='my_envs.envs:InvertedPendulumModifiedFrictionEnv',
     max_episode_steps=1000,
     reward_threshold=950,
 )
 
 register(
-id='InvertedPendulumModified-tilt-v0',
+id='InvertedPendulumModified-tilt-v10',
     entry_point='my_envs.envs:InvertedPendulumModifiedTiltEnv',
+    max_episode_steps=1000,
+    reward_threshold=950,
+)
+
+register(
+id='InvertedPendulumModified-multi-v10',
+    entry_point='my_envs.envs:InvertedPendulumModifiedMultiEnv',
     max_episode_steps=1000,
     reward_threshold=950,
 )
