@@ -167,8 +167,8 @@ class InvertedPendulumModifiedMotorEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         v = self.viewer
         v.cam.trackbodyid = 0
         v.cam.distance = self.model.stat.extent
-        
-        
+
+
 class InvertedPendulumModifiedMultiEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         utils.EzPickle.__init__(self)

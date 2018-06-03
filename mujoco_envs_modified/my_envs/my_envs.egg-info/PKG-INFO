@@ -6,5 +6,5 @@ Home-page: UNKNOWN
 License: UNKNOWN
 Description: UNKNOWN
 Platform: UNKNOWN
-Provides-Extra: mujoco
 Provides-Extra: all
+Provides-Extra: mujoco

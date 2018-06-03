@@ -10,3 +10,5 @@ from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedTilt
 from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMotorEnv 
 from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMultiEnv 
 
+from my_envs.envs.ant_modified import AntModifiedBaseEnv
+from my_envs.envs.ant_modified import AntModifiedMultiEnv

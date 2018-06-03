@@ -77,3 +77,17 @@ id='InvertedPendulumModified-multi-v10',
     max_episode_steps=1000,
     reward_threshold=950,
 )
+
+register(
+    id='AntModified-base-v11',
+    entry_point='my_envs.envs:AntModifiedBaseEnv',
+    max_episode_steps=1000,
+    reward_threshold=6000.0,
+)
+
+register(
+    id='AntModified-multi-v11',
+    entry_point='my_envs.envs:AntModifiedMultiEnv',
+    max_episode_steps=1000,
+    reward_threshold=6000.0,
+)
