@@ -44,7 +44,7 @@ register(
 
 register(
     id='InvertedPendulumModified-inertia-v10',
-    entry_point='my_envs.envs:InvertedPendulumModifiedInertia',
+    entry_point='my_envs.envs:InvertedPendulumModifiedInertiaEnv',
     max_episode_steps=1000,
     reward_threshold=950,
 )
