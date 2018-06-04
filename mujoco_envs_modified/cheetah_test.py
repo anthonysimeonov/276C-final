@@ -1,3 +1,20 @@
+
+import gym
+import mujoco_py
+
+from mujoco_py import load_model_from_xml, MjSim, MjViewer
+import mujoco_py as mp
+import math
+import os
+import gym
+import time
+import numpy as np
+
+
+env = gym.make('InvertedPendulum-v2')
+env.reset()
+
+MODEL_XML = """
 <!-- Cheetah Model
     The state space is populated with joints in the order that they are
     defined in this file. The actuators also operate on joints.
@@ -63,7 +80,7 @@
           <geom axisangle="0 1 0 -2.03" name="bshin" pos="-.14 0 -.07" rgba="0.9 0.6 0.6 1" size="0.046 .15" type="capsule"/>
           <body name="bfoot" pos="-.28 0 -.14">
             <joint axis="0 1 0" damping="3" name="bfoot" pos="0 0 0" range="-.4 .785" stiffness="120" type="hinge"/>
-            <geom axisangle="0 1 0 -.27" name="bfoot" pos=".03 0 -.097" rgba="0.9 0.6 0.6 1" size="0.046 .094" type="capsule"  friction=".4 .1 .1"/>
+            <geom axisangle="0 1 0 -.27" name="bfoot" pos=".03 0 -.097" rgba="0.9 0.6 0.6 1" size="0.046 .094" type="capsule" friction=".4 .1 .1"/>
           </body>
         </body>
       </body>
@@ -75,7 +92,7 @@
           <geom axisangle="0 1 0 -.6" name="fshin" pos=".065 0 -.09" rgba="0.9 0.6 0.6 1" size="0.046 .106" type="capsule"/>
           <body name="ffoot" pos=".13 0 -.18">
             <joint axis="0 1 0" damping="1.5" name="ffoot" pos="0 0 0" range="-.5 .5" stiffness="60" type="hinge"/>
-            <geom axisangle="0 1 0 -.6" name="ffoot" pos=".045 0 -.07" rgba="0.9 0.6 0.6 1" size="0.046 .07" type="capsule"  friction=".4 .1 .1"/>
+            <geom axisangle="0 1 0 -.6" name="ffoot" pos=".045 0 -.07" rgba="0.9 0.6 0.6 1" size="0.046 .07" type="capsule" friction=".4 .1 .1"/>
           </body>
         </body>
       </body>
@@ -90,3 +107,23 @@
     <motor gear="30" joint="ffoot" name="ffoot"/>
   </actuator>
 </mujoco>
+
+"""
+
+
+model = load_model_from_xml(MODEL_XML)
+
+sim = MjSim(model)
+
+viewer = MjViewer(sim)
+
+
+
+while True:
+	action = (env.action_space.sample())
+
+	sim.data.ctrl[0] = action[0]
+	#sim.data.ctrl[1] = action[0]
+
+	sim.step()
+	viewer.render()
