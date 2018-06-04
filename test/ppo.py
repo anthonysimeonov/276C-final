@@ -97,6 +97,7 @@ class PPO:
                 loss.backward()
                 self.optimizer.step()
 
+    
     def collect_data(self, envs):
         if self.state is None:
             state = envs.reset()
@@ -140,6 +141,7 @@ class PPO:
 
         return log_probs, values, states, actions, rewards, masks, next_value
 
+    
                 
 class ActorCritic(nn.Module):
     def __init__(self, num_inputs, num_outputs, hidden_size, std=0.0):
@@ -176,6 +178,12 @@ class ActorCritic(nn.Module):
             nn.init.normal_(m.weight, mean=0., std=0.1)
             nn.init.constant_(m.bias, 0.1)
             
+    def sample_action(self, state):
+            state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            dist, value = self.forward(state)
+            action = dist.sample()
+            return action
+            
 #Class that takes care of testing/visualizing rollouts and logging data
 
 class testing_envs():
@@ -206,15 +214,13 @@ class testing_envs():
         done = False
         total_reward = 0
         while not done:
-            state = torch.FloatTensor(state).unsqueeze(0).to(device)
-            dist, _ = control_model(state)
-            sample = dist.sample().cpu().numpy()[0]
             
-            #If need to add in compensation
-            if self.comp:
-                dist_comp, _ = comp_model(state)
-                sample = sample + dist_comp.sample().cpu().numpy()[0]
-                
+            sample = control_model.sample_action(state)
+            
+            #state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            #dist, _ = control_model(state)
+            #sample = dist.sample().cpu().numpy()[0]
+                            
             next_state, reward, done, _ = env.step(sample)
             state = next_state
             if self.vis:
