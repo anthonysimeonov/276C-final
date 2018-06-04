@@ -44,7 +44,9 @@ class PPO:
         else:
             weights = torch.load(directory, map_location='cpu')
         self.model.load_state_dict(weights)
-        
+
+    def save_weights(self, file_name):
+        torch.save(self.model.state_dict(), file_name)
 
     def compute_gae(self, next_value, rewards, masks, values, gamma=0.99, tau=0.95):
         values = values + [next_value]
