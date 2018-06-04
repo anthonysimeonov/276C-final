@@ -91,3 +91,17 @@ register(
     max_episode_steps=1000,
     reward_threshold=6000.0,
 )
+
+register(
+    id='HalfCheetahModified-base-v12',
+    entry_point='my_envs.envs:HalfCheetahModifiedBaseEnv',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-multi-v12',
+    entry_point='my_envs.envs:HalfCheetahModifiedMultiEnv',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)

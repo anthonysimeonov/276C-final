@@ -12,3 +12,6 @@ from my_envs.envs.inverted_pendulum_modified import InvertedPendulumModifiedMult
 
 from my_envs.envs.ant_modified import AntModifiedBaseEnv
 from my_envs.envs.ant_modified import AntModifiedMultiEnv
+
+from my_envs.envs.half_cheetah_modified import HalfCheetahModifiedBaseEnv
+from my_envs.envs.half_cheetah_modified import HalfCheetahModifiedMultiEnv
