@@ -1,3 +1,5 @@
+import gym
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -174,66 +176,101 @@ class ActorCritic(nn.Module):
             nn.init.normal_(m.weight, mean=0., std=0.1)
             nn.init.constant_(m.bias, 0.1)
             
-            
-            
-def plot(frame_idx, rewards, stds, test_envs, results_dir, save = 0):  
-    clear_output(True)
-    num_plots = len(rewards[0])
-    x = range(1,len(rewards)+1)
-    
-    cmap = plt.cm.get_cmap('Spectral')
-    
-    rewards = np.array(rewards) #v-stacks the rewards, each env of rewards is thus a column
-    stds = np.array(stds) #v-stacks the standard deviations, each env of standard deviation is thus a column
-    rew_high = rewards + stds
-    rew_low = rewards - stds
-    
-    subplots = plt.figure(figsize=(20,8*num_plots))
+#Class that takes care of testing/visualizing rollouts and logging data
 
-    overlay = plt.figure(figsize=(20,8))
-    overlay_ax = overlay.add_subplot(1,1,1)
-    overlay_ax.set_title("All rewards, frame %s" % (frame_idx))
-    
-    overlay_std = plt.figure(figsize=(20,8))
-    overlay_std_ax = overlay_std.add_subplot(1,1,1)
-    overlay_std_ax.set_title("All rewards, frame %s" % (frame_idx))
-    
-    custom_lines = []
-    for i in range(1,1+num_plots):
-        subplot_ax = subplots.add_subplot(num_plots, 1, i)
-        subplot_ax.set_title('env: %s frame %s. reward: %s' % (test_envs[i-1], frame_idx, rewards[-1,i-1]))        
-        subplot_ax.plot(x, rewards[:,i-1],
-                 x, rew_high[:,i-1],
-                 x, rew_low[:,i-1], color=cmap((i-1)/(num_plots)),linewidth=2.5)
-        subplot_ax.fill_between(x, rew_high[:,i-1], rew_low[:,i-1], color=cmap((i-1)/(num_plots)), alpha=0.5)
-        overlay_ax.plot(x,rewards[:,i-1], color=cmap((i-1)/(num_plots)), label = test_envs[i-1])
-        overlay_std_ax.plot(x, rewards[:,i-1],
-                 x, rew_high[:,i-1],
-                 x, rew_low[:,i-1], color=cmap((i-1)/(num_plots)),linewidth=2.5)
-        overlay_std_ax.fill_between(x, rew_high[:,i-1], rew_low[:,i-1], color=cmap((i-1)/(num_plots)), alpha=0.5)
-        custom_lines.append(Line2D([0], [0], color=cmap((i-1)/(num_plots)), lw=4)) #For Legends
-
-    overlay_ax.legend(custom_lines,test_envs,loc=2)
-    overlay_std_ax.legend(custom_lines,test_envs,loc=2)
-    
-    if save:
-        print(save)
-        overlay.savefig(results_dir + 'total_rewards.png')
-        overlay_std.savefig(results_dir + 'total_std.png')
-        np.savez(results_dir + 'data', rewards, stds, np.array(test_envs), np.array(frame_idx))
+class testing_envs():
+    def __init__(self, env_names, VISUALIZE, COMPENSATION, results_dir, logging_interval = 10):
+        self.env_names = env_names
+        self.num_test_envs = len(env_names)
+        self.results_dir = results_dir
+        self.logging_interval = logging_interval
+        self.vis = VISUALIZE
+        self.comp = COMPENSATION
+        self.cmap = plt.cm.get_cmap('Spectral') #easy to see color range
         
-    plt.show()
+        self.envs = [self.env_init(name) for name in env_names]
+        
+    def env_init(self, name):
+        logdir = ("./" + name + "_videos/")
+        env = gym.make(name)
+        if self.vis:
+            if not os.path.exists(logdir):
+                os.mkdir(logdir)
+                env = gym.wrappers.Monitor(env, logdir, force=True, video_callable=lambda episode_id: episode_id%self.logging_interval==0)
+        return env
     
-def test_env(model, test_env, vis=False):
-    state = test_env.reset()
-    if vis: test_env.render()
-    done = False
-    total_reward = 0
-    while not done:
-        state = torch.FloatTensor(state).unsqueeze(0).to(device)
-        dist, _ = model(state)
-        next_state, reward, done, _ = test_env.step(dist.sample().cpu().numpy()[0])
-        state = next_state
-        if vis: test_env.render()
-        total_reward += reward
-    return total_reward
+    def test_env(self, env, control_model, comp_model = None):
+        state = env.reset()
+        if self.vis: 
+            env.render()
+        done = False
+        total_reward = 0
+        while not done:
+            state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            dist, _ = control_model(state)
+            sample = dist.sample().cpu().numpy()[0]
+            
+            #If need to add in compensation
+            if self.comp:
+                dist_comp, _ = comp_model(state)
+                sample = sample + dist_comp.sample().cpu().numpy()[0]
+                
+            next_state, reward, done, _ = env.step(sample)
+            state = next_state
+            if self.vis:
+                env.render()
+            total_reward += reward
+        return total_reward
+        
+    def plot(self, frame_idx, rewards, stds, stdplots = 1, rewplots = 1, indvplots = 0, save = 0):  
+        clear_output(True)
+        num_plots = self.num_test_envs
+        x = range(1,len(rewards)+1)
+
+        rewards = np.array(rewards) #v-stacks the rewards, each env of rewards is thus a column
+        stds = np.array(stds) #v-stacks the standard deviations, each env of standard deviation is thus a column
+        rew_high = rewards + stds
+        rew_low = rewards - stds
+        
+        if indvplots:
+            subplots = plt.figure(figsize=(20,8*num_plots))
+            for i in range(num_plots):
+                subplot_ax = subplots.add_subplot(num_plots, 1, i+1)
+                subplot_ax.set_title('env: %s frame %s. reward: %s' % (self.env_names[i], frame_idx, rewards[-1,i]))        
+                subplot_ax.plot(x, rewards[:,i],
+                         x, rew_high[:,i],
+                         x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=2.5)
+                subplot_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)), alpha=0.5)
+
+        if rewplots:
+            overlay = plt.figure(figsize=(20,8))
+            overlay_ax = overlay.add_subplot(1,1,1)
+            overlay_ax.set_title("All rewards, frame %s" % (frame_idx))
+            custom_lines = []
+            for i in range(num_plots):
+                overlay_ax.plot(x,rewards[:,i], color=self.cmap((i)/(num_plots)), label = self.env_names[i])
+                custom_lines.append(Line2D([0], [0], color=self.cmap((i-1)/(num_plots)), lw=4)) #For Legends
+            overlay_ax.legend(custom_lines,self.env_names,loc=2)
+             
+        if stdplots:
+            overlay_std = plt.figure(figsize=(20,8))
+            overlay_std_ax = overlay_std.add_subplot(1,1,1)
+            overlay_std_ax.set_title("All rewards, frame %s" % (frame_idx))
+            custom_lines = []
+            for i in range(num_plots):
+                overlay_std_ax.plot(x, rewards[:,i],
+                x, rew_high[:,i],
+                x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=2.5)
+                overlay_std_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)), alpha=0.5)
+                custom_lines.append(Line2D([0], [0], color=self.cmap((i-1)/(num_plots)), lw=4)) #For Legends
+            overlay_std_ax.legend(custom_lines,self.env_names,loc=2)
+
+        if save:
+            print(save)
+            overlay.savefig(self.results_dir + 'total_rewards.png')
+            overlay_std.savefig(self.results_dir + 'total_std.png')
+            np.savez(self.results_dir + 'data', rewards, stds, np.array(self.env_names), np.array(frame_idx))
+
+        plt.show()
+       
+            
