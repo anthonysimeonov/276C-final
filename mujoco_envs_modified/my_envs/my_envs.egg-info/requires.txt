@@ -1,9 +1,0 @@
-numpy>=1.10.4
-
-[all]
-mujoco_py>=1.50
-imageio
-
-[mujoco]
-mujoco_py>=1.50
-imageio
