@@ -187,8 +187,9 @@ class ActorCritic(nn.Module):
 #Class that takes care of testing/visualizing rollouts and logging data
 
 class testing_envs():
-    def __init__(self, env_names, VISUALIZE, COMPENSATION, results_dir, logging_interval = 10):
+    def __init__(self, env_names, VISUALIZE, COMPENSATION, results_dir, train_env_index, logging_interval = 10):
         self.env_names = env_names
+        self.training_env = env_names[train_env_index]
         self.num_test_envs = len(env_names)
         self.results_dir = results_dir
         self.logging_interval = logging_interval
@@ -247,7 +248,7 @@ class testing_envs():
             self.subplots = plt.figure(figsize=(20,8*num_plots))
             for i in range(num_plots):
                 subplot_ax = self.subplots.add_subplot(num_plots, 1, i+1)
-                subplot_ax.set_title('env: %s frame %s. reward: %s' % (self.env_names[i], frame_idx, rewards[-1,i]))        
+                subplot_ax.set_title('env: %s training on: %s frame %s. reward: %s' % (self.training_env, self.env_names[i], frame_idx, rewards[-1,i]))        
                 subplot_ax.plot(x, rewards[:,i],
                          x, rew_high[:,i],
                          x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=4)
@@ -256,7 +257,7 @@ class testing_envs():
         if which_plts[1]:
             self.overlay = plt.figure(figsize=(20,8))
             overlay_ax = self.overlay.add_subplot(1,1,1)
-            overlay_ax.set_title("All rewards, frame %s" % (frame_idx))
+            overlay_ax.set_title("All rewards, training on {}, frame {}" .format(self.training_env,frame_idx))
             custom_lines = []
             for i in range(num_plots):
                 overlay_ax.plot(x,rewards[:,i], color=self.cmap((i)/(num_plots)), label = self.env_names[i],linewidth=4)
@@ -266,7 +267,7 @@ class testing_envs():
         if which_plts[2]:
             self.overlay_std = plt.figure(figsize=(20,8))
             overlay_std_ax = self.overlay_std.add_subplot(1,1,1)
-            overlay_std_ax.set_title("All rewards, frame %s" % (frame_idx))
+            overlay_std_ax.set_title("All rewards, training on {}, frame {}" .format(self.training_env,frame_idx))
             custom_lines = []
             for i in range(num_plots):
                 overlay_std_ax.plot(x, rewards[:,i],
