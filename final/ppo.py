@@ -196,6 +196,11 @@ class testing_envs():
         self.comp = COMPENSATION
         self.cmap = plt.cm.get_cmap('Spectral') #easy to see color range
         
+        #Plotting figures
+        self.subplots = None
+        self.overlay = None
+        self.overlay_std = None
+        
         self.envs = [self.env_init(name) for name in env_names]
         
     def env_init(self, name):
@@ -228,55 +233,62 @@ class testing_envs():
             total_reward += reward
         return total_reward
         
-    def plot(self, frame_idx, rewards, stds, stdplots = 1, rewplots = 1, indvplots = 0, save = 0):  
+    def plot(self, frame_idx, rewards, stds, which_plts, save = 0, save_indx = 'end'):  
         clear_output(True)
         num_plots = self.num_test_envs
-        x = range(1,len(rewards)+1)
+        x = range(len(rewards))
 
         rewards = np.array(rewards) #v-stacks the rewards, each env of rewards is thus a column
         stds = np.array(stds) #v-stacks the standard deviations, each env of standard deviation is thus a column
         rew_high = rewards + stds
         rew_low = rewards - stds
         
-        if indvplots:
-            subplots = plt.figure(figsize=(20,8*num_plots))
+        if which_plts[0]:
+            self.subplots = plt.figure(figsize=(20,8*num_plots))
             for i in range(num_plots):
-                subplot_ax = subplots.add_subplot(num_plots, 1, i+1)
+                subplot_ax = self.subplots.add_subplot(num_plots, 1, i+1)
                 subplot_ax.set_title('env: %s frame %s. reward: %s' % (self.env_names[i], frame_idx, rewards[-1,i]))        
                 subplot_ax.plot(x, rewards[:,i],
                          x, rew_high[:,i],
-                         x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=2.5)
-                subplot_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)), alpha=0.5)
+                         x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=4)
+                subplot_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)),alpha=0.5)
 
-        if rewplots:
-            overlay = plt.figure(figsize=(20,8))
-            overlay_ax = overlay.add_subplot(1,1,1)
+        if which_plts[1]:
+            self.overlay = plt.figure(figsize=(20,8))
+            overlay_ax = self.overlay.add_subplot(1,1,1)
             overlay_ax.set_title("All rewards, frame %s" % (frame_idx))
             custom_lines = []
             for i in range(num_plots):
-                overlay_ax.plot(x,rewards[:,i], color=self.cmap((i)/(num_plots)), label = self.env_names[i])
-                custom_lines.append(Line2D([0], [0], color=self.cmap((i-1)/(num_plots)), lw=4)) #For Legends
-            overlay_ax.legend(custom_lines,self.env_names,loc=2)
+                overlay_ax.plot(x,rewards[:,i], color=self.cmap((i)/(num_plots)), label = self.env_names[i],linewidth=4)
+                custom_lines.append(Line2D([0], [0], color=self.cmap((i)/(num_plots)), lw=4)) #For Legends
+            overlay_ax.legend(custom_lines,self.env_names,loc=2,prop={'size': 11})
              
-        if stdplots:
-            overlay_std = plt.figure(figsize=(20,8))
-            overlay_std_ax = overlay_std.add_subplot(1,1,1)
+        if which_plts[2]:
+            self.overlay_std = plt.figure(figsize=(20,8))
+            overlay_std_ax = self.overlay_std.add_subplot(1,1,1)
             overlay_std_ax.set_title("All rewards, frame %s" % (frame_idx))
             custom_lines = []
             for i in range(num_plots):
                 overlay_std_ax.plot(x, rewards[:,i],
                 x, rew_high[:,i],
-                x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=2.5)
+                x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=4)
                 overlay_std_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)), alpha=0.5)
-                custom_lines.append(Line2D([0], [0], color=self.cmap((i-1)/(num_plots)), lw=4)) #For Legends
-            overlay_std_ax.legend(custom_lines,self.env_names,loc=2)
+                custom_lines.append(Line2D([0], [0], color=self.cmap((i)/(num_plots)), lw=4)) #For Legends
+            overlay_std_ax.legend(custom_lines,self.env_names,loc=2,prop={'size': 11})
 
         if save:
-            print(save)
-            overlay.savefig(self.results_dir + 'total_rewards.png')
-            overlay_std.savefig(self.results_dir + 'total_std.png')
-            np.savez(self.results_dir + 'data', rewards, stds, np.array(self.env_names), np.array(frame_idx))
+            print("Saving figures")
+            if which_plts[0]:
+                self.subplots.savefig(self.results_dir + 'Reward_subplots_' + save_indx+ '.png')
+            if which_plts[1]:
+                self.overlay.savefig(self.results_dir + 'Total_rewards_' + save_indx+ '.png')
+            if which_plts[2]:
+                self.overlay_std.savefig(self.results_dir + 'Total_rewards_std_' + save_indx+ '.png')
+                
+            np.savez(self.results_dir + 'data_' + save_indx, rewards, stds, np.array(self.env_names), np.array(frame_idx))
 
         plt.show()
-       
-            
+        
+        
+        
+        
