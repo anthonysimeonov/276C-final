@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 class ensemble():
-    def __init__(self, base_env_name, import_tags, num_inputs, num_outputs, is_comp, debug = False):
+    def __init__(self, base_env_name, import_tags, num_inputs, num_outputs, is_comp = False, debug = False):
         self.base_env_name = base_env_name
         self.import_tags = import_tags
         self.baseline_policies = {}
@@ -75,7 +75,7 @@ class ensemble():
             if self.debug:
                 print("Imported Compensator Policies:\n")
                 print("Baseline:    ")
-                print(baseline_policies['base'].model)
+                print(self.baseline_policies['base'].model)
                 for mod, policy in self.compensator_policies.items():
                     print("Modification:    ", mod)
                     print(policy.model)
@@ -153,7 +153,7 @@ class ensemble():
                 print(actions, actions.size())
 
                 print("ensemble weights:")
-                print(policy_weights, weights.size())
+                print(policy_weights, policy_weights.size())
                 
                 print("baseline action:")
                 print(base_action, base_action.size())
@@ -191,7 +191,7 @@ class ensemble():
                 print("multi-policy multi-env action tensor: ")
                 print(actions, actions.size())
                 print("ensemble weights:")
-                print(policy_weights, weights.size())
+                print(policy_weights, policy_weights.size())
             
             action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
             if self.debug:
