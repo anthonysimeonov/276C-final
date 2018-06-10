@@ -49,7 +49,7 @@ class ensemble():
         compensator_folders = {}
         if self.is_comp:
             # get compensator folders and weights
-            compensator_folders = os.listdir('./compensator_weights')
+            folder_names = os.listdir('./compensator_weights')
             for mod in self.import_tags:
                 compensator_folders[mod] = fnmatch.filter(folder_names, self.base_env_name + mod + '*')
 
@@ -92,19 +92,19 @@ class ensemble():
                 
             if self.debug:
                 print("Imported Policies:\n")
-                for mod, policy in self.policies.items():
+                for mod, policy in self.baseline_policies.items():
                     print("Modification:    ", mod)
                     print(policy.model)
                     
             self.baseline_policy_list = self.baseline_policies.values()
         
-    def uniform_action(self, state):
-        """ Outputs a uniform average of actions from variable number of policies"""
-        num_policies = len(self.policy_list)
-        actions = np.array([policy.model.sample_action(state) for policy in self.policy_list])
+    # def uniform_action(self, state):
+    #     """ Outputs a uniform average of actions from variable number of policies"""
+    #     num_policies = len(self.policy_list)
+    #     actions = np.array([policy.model.sample_action(state) for policy in self.policy_list])
 
-        action = action.sum()/num_policies
-        return action
+    #     action = actions.sum()/num_policies
+    #     return action
 
     def weighted_action(self, state, policy_weights):
         """ Outputs a weighted sum of actions defined by weight vector and variable number of policies"""
