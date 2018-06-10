@@ -184,6 +184,84 @@ class ActorCritic(nn.Module):
             action = dist.sample()
             return action
             
+class compensator:
+    def __init__(self, num_inputs, num_outputs, policy, hidden_size=64, lr = 3e-4, num_steps = 2048,
+                 mini_batch_size = 64, ppo_epochs = 10, threshold_reward = 950, action_appended = False):
+        
+        if action_appended:
+            num_inputs += num_outputs
+            
+        self.ppo_compensator = PPO(num_inputs, num_outputs, hidden_size = hidden_size)
+        self.policy = policy
+        self.action_appended = action_appended
+        
+    
+    def sample_action(self, state):
+        #return self.ppo_compensator.model.sample_action(state)
+        if self.action_appended:
+            policy_action = self.policy.model.sample_action(state).squeeze(dim = 0)
+            compensator_action = self.ppo_compensator.model.sample_action(np.hstack((state, policy_action)))
+            return policy_action + compensator_action
+
+        else:
+            return self.policy.model.sample_action(state) + self.ppo_compensator.model.sample_action(state)
+        
+    def collect_data(self, envs):
+        if self.ppo_compensator.state is None:
+            state = envs.reset()
+
+        #----------------------------------
+        #collect data
+        #----------------------------------
+        log_probs = []
+        values    = []
+        states    = []
+        actions   = []
+        rewards   = []
+        masks     = []
+        entropy = 0
+        counter = 0
+
+        for _ in range(self.ppo_compensator.num_steps):
+            
+            policy_action = self.policy.model.sample_action(state).detach().squeeze(dim = 0)
+            
+            if self.action_appended:
+                state = np.hstack((state, policy_action))
+                
+            state = torch.FloatTensor(state).to(device)
+            dist, value = self.ppo_compensator.model(state)
+            action = dist.sample()
+            #action_sum = dist.sample()
+            action_sum = action + policy_action
+            
+            #print(action.shape)
+            #print(self.policy.model.sample_action(state).detach().shape)
+            next_state, reward, done, _ = envs.step(action_sum.cpu().numpy())
+
+            log_prob = dist.log_prob(action)
+            entropy += dist.entropy().mean()
+
+            log_probs.append(log_prob)
+            values.append(value)
+            rewards.append(torch.FloatTensor(reward).unsqueeze(1).to(device))
+            masks.append(torch.FloatTensor(1 - done).unsqueeze(1).to(device))
+
+            states.append(state)
+            actions.append(action)
+
+            state = next_state
+            self.ppo_compensator.frame_idx += 1
+
+            
+        if self.action_appended:
+            next_state = np.hstack((next_state, policy_action))
+
+        next_state = torch.FloatTensor(next_state).to(device)
+        _, next_value = self.ppo_compensator.model(next_state) #should this be the sum? nono.
+
+        return log_probs, values, states, actions, rewards, masks, next_value
+            
 #Class that takes care of testing/visualizing rollouts and logging data
 
 class testing_envs():
