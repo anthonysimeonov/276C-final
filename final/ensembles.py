@@ -56,8 +56,14 @@ class ensemble():
             for key, val in compensator_folders.items():
                 folder = os.listdir('./compensator_weights/' + str(val[0]))
 
+                if self.debug:
+                    print("weight folder:     ", folder)
+
                 weight_file = fnmatch.filter(folder, '*endweights')
                 weight_file = weight_file[0]
+
+                if self.debug:
+                    print("Weight file:     ", weight_file)
 
                 self.compensator_policies[key] = PPO(self.num_inputs, self.num_outputs)
                 full_weight_file = './compensator_weights/' + str(val[0]) + '/' + weight_file
@@ -65,6 +71,14 @@ class ensemble():
 
             self.baseline_policies['base'] = PPO(self.num_inputs, self.num_outputs)
             self.baseline_policies['base'].load_weights(baseline_file)
+
+            if self.debug:
+                print("Imported Compensator Policies:\n")
+                print("Baseline:    ")
+                print(baseline_policies['base'].model)
+                for mod, policy in self.compensator_policies.items():
+                    print("Modification:    ", mod)
+                    print(policy.model)
 
             self.compensator_policy_list = self.compensator_policies.values()
             self.baseline_policy_list = self.baseline_policies.values()
@@ -128,6 +142,26 @@ class ensemble():
             actions = actions.squeeze(0)
             comp_action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
             action = base_action + comp_action
+
+            if self.debug:
+                print("weights:    ", policy_weights)
+                print("length ", policy_weights.shape[1])
+                print("comp policy list:    ", self.compensator_policy_list)
+                print("length: ", len(self.compensator_policy_list))
+
+                print("multi-policy multi-env compensation action tensor: ")
+                print(actions, actions.size())
+
+                print("ensemble weights:")
+                print(policy_weights, weights.size())
+                
+                print("baseline action:")
+                print(base_action, base_action.size())
+                print("compensator action:")
+                print(comp_action, comp_action.size())
+                print("full action:")
+                print(action, action.size())
+
             return action
 
         else:
