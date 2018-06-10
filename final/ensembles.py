@@ -110,13 +110,25 @@ class ensemble():
         """ Outputs a weighted sum of actions defined by weight vector and variable number of policies"""
         if self.is_comp:
             # TODO: need to decide if baseline is multiplied by weights or left alone, after that same thing
-            if policy_weights.shape[1] != len(self.baseline_policy_list):
+            if policy_weights.shape[1] != len(self.compensator_policy_list):
                 print("Weight vector length must match number of policies\n")
                 print("weights:    ", policy_weights)
                 print("length ", policy_weights.shape[1])
-                print("policy list:    ", self.baseline_policy_list)
-                print("length: ", len(self.baseline_policy_list))
+                print("policy list:    ", self.compensator_policy_list)
+                print("length: ", len(self.compensator_policy_list))
                 return
+
+            base_action = self.baseline_policy_list[0].model.sample_action(state)
+            for i, policy in enumerate(self.compensator_policy_list):
+                if i == 0:
+                    actions = policy.model.sample_action(state)
+                else:
+                    actions = torch.cat((actions, policy.model.sample_action(state)), 2)
+
+            actions = actions.squeeze(0)
+            comp_action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
+            action = base_action + comp_action
+            return action
 
         else:
             if policy_weights.shape[1] != len(self.baseline_policy_list):
@@ -140,15 +152,14 @@ class ensemble():
                     actions = torch.cat((actions, policy.model.sample_action(state)), 2)
                 
             actions = actions.squeeze(0)
-            weights = policy_weights
 
             if self.debug:
                 print("multi-policy multi-env action tensor: ")
                 print(actions, actions.size())
                 print("ensemble weights:")
-                print(weights, weights.size())
+                print(policy_weights, weights.size())
             
-            action = torch.sum((actions * weights), dim=1).unsqueeze(1)
+            action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
             if self.debug:
                 print("action:")
                 print(action, action.size())
