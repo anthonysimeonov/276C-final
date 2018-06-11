@@ -132,7 +132,7 @@ class ensemble():
                 print("length: ", len(self.compensator_policy_list))
                 return
 
-            base_action = self.baseline_policy_list[0].model.sample_action(state)
+            base_action = self.baseline_policies['base'].model.sample_action(state).squeeze(0)
             for i, policy in enumerate(self.compensator_policy_list):
                 if i == 0:
                     actions = policy.model.sample_action(state)
@@ -228,8 +228,7 @@ class PPO_Ensemble(PPO):
             dist, value = self.model(state)
 
             weights = dist.sample()
-            action = self.ensemble.weighted_action(
-                state.cpu().numpy(), weights)
+            action = self.ensemble.weighted_action(state.cpu().numpy(), weights)
             next_state, reward, done, _ = envs.step(action.cpu().numpy())
 #             next_state, reward, done, _ = envs.step(action)
 
