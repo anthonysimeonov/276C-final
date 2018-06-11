@@ -200,6 +200,58 @@ class ensemble():
             return action
 
 
+class PPO_Ensemble(PPO):
+    def __init__(self, num_inputs, num_outputs, ensemble, hidden_size=64, lr=3e-4, num_steps=2048,
+                 mini_batch_size=64, ppo_epochs=10, threshold_reward=950):
+        super().__init__(num_inputs, num_outputs, hidden_size=64, lr=3e-4, num_steps=2048,
+                         mini_batch_size=64, ppo_epochs=10, threshold_reward=950)
+        self.ensemble = ensemble
+
+    def collect_data(self, envs):
+        if self.state is None:
+            state = envs.reset()
+
+        #----------------------------------
+        #collect data
+        #----------------------------------
+        log_probs = []
+        values = []
+        states = []
+        actions = []
+        rewards = []
+        masks = []
+        entropy = 0
+        counter = 0
+
+        for _ in range(self.num_steps):
+            state = torch.FloatTensor(state).to(device)
+            dist, value = self.model(state)
+
+            weights = dist.sample()
+            action = self.ensemble.weighted_action(
+                state.cpu().numpy(), weights)
+            next_state, reward, done, _ = envs.step(action.cpu().numpy())
+#             next_state, reward, done, _ = envs.step(action)
+
+            log_prob = dist.log_prob(weights)
+            entropy += dist.entropy().mean()
+
+            log_probs.append(log_prob)
+            values.append(value)
+            rewards.append(torch.FloatTensor(reward).unsqueeze(1).to(device))
+            masks.append(torch.FloatTensor(1 - done).unsqueeze(1).to(device))
+
+            states.append(state)
+            actions.append(weights)
+
+            state = next_state
+            self.frame_idx += 1
+
+        next_state = torch.FloatTensor(next_state).to(device)
+        _, next_value = self.model(next_state)
+
+        return log_probs, values, states, actions, rewards, masks, next_value
+
 class ensemble_testing_envs(testing_envs):
     def __init__(self, env_names, VISUALIZE, COMPENSATION, results_dir, train_env_index, logging_interval=10):
         super().__init__(env_names, VISUALIZE, COMPENSATION,
