@@ -18,8 +18,8 @@ device   = torch.device("cuda" if use_cuda else "cpu")
 class PPO:
     def __init__(self, num_inputs, num_outputs, hidden_size=64, lr = 3e-4, num_steps = 2048,
                  mini_batch_size = 64, ppo_epochs = 10, threshold_reward = 950):
-        
-        
+
+
         #Hyper params:
         self.hidden_size      = hidden_size
         self.lr               = lr
@@ -27,7 +27,7 @@ class PPO:
         self.mini_batch_size  = mini_batch_size
         self.ppo_epochs       = ppo_epochs
         self.threshold_reward = threshold_reward
-        
+
         #Model params:
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
@@ -35,11 +35,11 @@ class PPO:
         self.early_stop = False
         self.state = None
         self.frame_idx = 0
-        
+
         self.model = ActorCritic(self.num_inputs, self.num_outputs, self.hidden_size).to(device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr)
-        
-        
+
+
     def load_weights(self, directory):
         if use_cuda:
             weights = torch.load(directory)
@@ -67,7 +67,7 @@ class PPO:
             yield states[rand_ids, :], actions[rand_ids, :], log_probs[rand_ids, :], returns[rand_ids, :], advantage[rand_ids, :]
 
 
-    def ppo_update(self, ppo_epochs, mini_batch_size, states, actions, log_probs, 
+    def ppo_update(self, ppo_epochs, mini_batch_size, states, actions, log_probs,
                    returns, values, clip_param=0.2):
 
         returns   = torch.cat(returns).detach()
@@ -78,7 +78,7 @@ class PPO:
         advantages = returns - values
 
         for _ in range(ppo_epochs):
-            for state, action, old_log_probs, return_, advantage in self.ppo_iter(mini_batch_size, 
+            for state, action, old_log_probs, return_, advantage in self.ppo_iter(mini_batch_size,
                                                                                   states, actions, log_probs, returns, advantages):
                 dist, value = self.model(state)
                 entropy = dist.entropy().mean()
@@ -97,11 +97,11 @@ class PPO:
                 loss.backward()
                 self.optimizer.step()
 
-    
+
     def collect_data(self, envs):
         if self.state is None:
             state = envs.reset()
-            
+
         #----------------------------------
         #collect data
         #----------------------------------
@@ -141,8 +141,8 @@ class PPO:
 
         return log_probs, values, states, actions, rewards, masks, next_value
 
-    
-                
+
+
 class ActorCritic(nn.Module):
     def __init__(self, num_inputs, num_outputs, hidden_size, std=0.0):
         super(ActorCritic, self).__init__()
@@ -177,25 +177,25 @@ class ActorCritic(nn.Module):
         if isinstance(m, nn.Linear):
             nn.init.normal_(m.weight, mean=0., std=0.1)
             nn.init.constant_(m.bias, 0.1)
-            
+
     def sample_action(self, state):
             state = torch.FloatTensor(state).unsqueeze(0).to(device)
             dist, value = self.forward(state)
             action = dist.sample()
             return action
-            
+
 class compensator:
     def __init__(self, num_inputs, num_outputs, policy, hidden_size=64, lr = 3e-4, num_steps = 2048,
                  mini_batch_size = 64, ppo_epochs = 10, threshold_reward = 950, action_appended = False):
-        
+
         if action_appended:
             num_inputs += num_outputs
-            
+
         self.ppo_compensator = PPO(num_inputs, num_outputs, hidden_size = hidden_size)
         self.policy = policy
         self.action_appended = action_appended
-        
-    
+
+
     def sample_action(self, state):
         #return self.ppo_compensator.model.sample_action(state)
         if self.action_appended:
@@ -205,7 +205,7 @@ class compensator:
 
         else:
             return self.policy.model.sample_action(state) + self.ppo_compensator.model.sample_action(state)
-        
+
     def collect_data(self, envs):
         if self.ppo_compensator.state is None:
             state = envs.reset()
@@ -223,18 +223,18 @@ class compensator:
         counter = 0
 
         for _ in range(self.ppo_compensator.num_steps):
-            
+
             policy_action = self.policy.model.sample_action(state).detach().squeeze(dim = 0)
-            
+
             if self.action_appended:
                 state = np.hstack((state, policy_action))
-                
+
             state = torch.FloatTensor(state).to(device)
             dist, value = self.ppo_compensator.model(state)
             action = dist.sample()
             #action_sum = dist.sample()
             action_sum = action + policy_action
-            
+
             #print(action.shape)
             #print(self.policy.model.sample_action(state).detach().shape)
             next_state, reward, done, _ = envs.step(action_sum.cpu().numpy())
@@ -253,7 +253,7 @@ class compensator:
             state = next_state
             self.ppo_compensator.frame_idx += 1
 
-            
+
         if self.action_appended:
             next_state = np.hstack((next_state, policy_action))
 
@@ -261,7 +261,7 @@ class compensator:
         _, next_value = self.ppo_compensator.model(next_state) #should this be the sum? nono.
 
         return log_probs, values, states, actions, rewards, masks, next_value
-            
+
 #Class that takes care of testing/visualizing rollouts and logging data
 
 class testing_envs():
@@ -274,14 +274,14 @@ class testing_envs():
         self.vis = VISUALIZE
         self.comp = COMPENSATION
         self.cmap = plt.cm.get_cmap('Spectral') #easy to see color range
-        
+
         #Plotting figures
         self.subplots = None
         self.overlay = None
         self.overlay_std = None
-        
+
         self.envs = [self.env_init(name) for name in env_names]
-        
+
     def env_init(self, name):
         logdir = ("./" + name + "_videos/")
         env = gym.make(name)
@@ -290,29 +290,29 @@ class testing_envs():
                 os.mkdir(logdir)
                 env = gym.wrappers.Monitor(env, logdir, force=True, video_callable=lambda episode_id: episode_id%self.logging_interval==0)
         return env
-    
+
     def test_env(self, env, control_model, comp_model = None):
         state = env.reset()
-        if self.vis: 
+        if self.vis:
             env.render()
         done = False
         total_reward = 0
         while not done:
-            
+
             sample = control_model.sample_action(state)
-            
+
             #state = torch.FloatTensor(state).unsqueeze(0).to(device)
             #dist, _ = control_model(state)
             #sample = dist.sample().cpu().numpy()[0]
-                            
+
             next_state, reward, done, _ = env.step(sample)
             state = next_state
             if self.vis:
                 env.render()
             total_reward += reward
         return total_reward
-        
-    def plot(self, frame_idx, rewards, stds, which_plts, save = 0, save_indx = 'end'):  
+
+    def plot(self, frame_idx, rewards, stds, which_plts, save = 0, save_indx = 'end'):
         clear_output(True)
         num_plots = self.num_test_envs
         x = range(len(rewards))
@@ -321,16 +321,18 @@ class testing_envs():
         stds = np.array(stds) #v-stacks the standard deviations, each env of standard deviation is thus a column
         rew_high = rewards + stds
         rew_low = rewards - stds
-        
+
         if which_plts[0]:
             self.subplots = plt.figure(figsize=(20,8*num_plots))
             for i in range(num_plots):
                 subplot_ax = self.subplots.add_subplot(num_plots, 1, i+1)
-                subplot_ax.set_title('env: %s training on: %s frame %s. reward: %s' % (self.training_env, self.env_names[i], frame_idx, rewards[-1,i]))        
+                subplot_ax.set_title('env: %s training on: %s frame %s. reward: %s' % (self.training_env, self.env_names[i], frame_idx, rewards[-1,i]))
                 subplot_ax.plot(x, rewards[:,i],
                          x, rew_high[:,i],
                          x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=4)
                 subplot_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)),alpha=0.5)
+                subplot_ax.set_xlabel('1000 time steps')
+                subplot_ax.set_ylabel('reward')
 
         if which_plts[1]:
             self.overlay = plt.figure(figsize=(20,8))
@@ -341,7 +343,9 @@ class testing_envs():
                 overlay_ax.plot(x,rewards[:,i], color=self.cmap((i)/(num_plots)), label = self.env_names[i],linewidth=4)
                 custom_lines.append(Line2D([0], [0], color=self.cmap((i)/(num_plots)), lw=4)) #For Legends
             overlay_ax.legend(custom_lines,self.env_names,loc=2,prop={'size': 11})
-             
+            overlay_ax.set_xlabel('1000 time steps')
+            overlay_ax.set_ylabel('reward')
+
         if which_plts[2]:
             self.overlay_std = plt.figure(figsize=(20,8))
             overlay_std_ax = self.overlay_std.add_subplot(1,1,1)
@@ -354,6 +358,8 @@ class testing_envs():
                 overlay_std_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)), alpha=0.5)
                 custom_lines.append(Line2D([0], [0], color=self.cmap((i)/(num_plots)), lw=4)) #For Legends
             overlay_std_ax.legend(custom_lines,self.env_names,loc=2,prop={'size': 11})
+            overlay_std_ax.set_xlabel('1000 time steps')
+            overlay_std_ax.set_ylabel('reward')
 
         if save:
             print("Saving figures")
@@ -363,11 +369,7 @@ class testing_envs():
                 self.overlay.savefig(self.results_dir + 'Total_rewards_' + save_indx+ '.png')
             if which_plts[2]:
                 self.overlay_std.savefig(self.results_dir + 'Total_rewards_std_' + save_indx+ '.png')
-                
+
             np.savez(self.results_dir + 'data_' + save_indx, rewards, stds, np.array(self.env_names), np.array(frame_idx))
 
         plt.show()
-        
-        
-        
-        
