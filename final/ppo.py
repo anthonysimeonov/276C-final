@@ -312,7 +312,7 @@ class testing_envs():
             total_reward += reward
         return total_reward
 
-    def plot(self, frame_idx, rewards, stds, which_plts, save = 0, save_indx = 'end'):
+    def plot(self, frame_idx, rewards, stds, which_plts, time_step_inc, save = 0, save_indx = 'end'):
         clear_output(True)
         num_plots = self.num_test_envs
         x = range(len(rewards))
@@ -331,8 +331,8 @@ class testing_envs():
                          x, rew_high[:,i],
                          x, rew_low[:,i], color=self.cmap((i)/(num_plots)),linewidth=4)
                 subplot_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)),alpha=0.5)
-                subplot_ax.set_xlabel('1000 time steps')
-                subplot_ax.set_ylabel('reward')
+                subplot_ax.set_xlabel('{} Time Steps'.format(time_step_inc))
+                subplot_ax.set_ylabel('Average Reward')
 
         if which_plts[1]:
             self.overlay = plt.figure(figsize=(20,8))
@@ -343,8 +343,8 @@ class testing_envs():
                 overlay_ax.plot(x,rewards[:,i], color=self.cmap((i)/(num_plots)), label = self.env_names[i],linewidth=4)
                 custom_lines.append(Line2D([0], [0], color=self.cmap((i)/(num_plots)), lw=4)) #For Legends
             overlay_ax.legend(custom_lines,self.env_names,loc=2,prop={'size': 11})
-            overlay_ax.set_xlabel('1000 time steps')
-            overlay_ax.set_ylabel('reward')
+            overlay_ax.set_xlabel('{} Time Steps'.format(time_step_inc))
+            overlay_ax.set_ylabel('Average Reward')
 
         if which_plts[2]:
             self.overlay_std = plt.figure(figsize=(20,8))
@@ -358,8 +358,8 @@ class testing_envs():
                 overlay_std_ax.fill_between(x, rew_high[:,i], rew_low[:,i], color=self.cmap((i)/(num_plots)), alpha=0.5)
                 custom_lines.append(Line2D([0], [0], color=self.cmap((i)/(num_plots)), lw=4)) #For Legends
             overlay_std_ax.legend(custom_lines,self.env_names,loc=2,prop={'size': 11})
-            overlay_std_ax.set_xlabel('1000 time steps')
-            overlay_std_ax.set_ylabel('reward')
+            overlay_std_ax.set_xlabel('{} Time Steps'.format(time_step_inc))
+            overlay_std_ax.set_ylabel('Average Reward')
 
         if save:
             print("Saving figures")

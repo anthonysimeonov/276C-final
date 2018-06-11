@@ -38,7 +38,7 @@ class ensemble():
             self.compensator_policy_list = []
 
         self.debug = debug
-        
+
     def import_policies(self, baseline_file = None):
         """
         Import policy weights from previous training. If using compensators, must specify
@@ -87,31 +87,31 @@ class ensemble():
             folder_names = os.listdir('./baseline_weights')
             for mod in self.import_tags:
                 baseline_folders[mod] = fnmatch.filter(folder_names, self.base_env_name + mod + '*')
-            
+
             for key, val in baseline_folders.items():
                 folder = os.listdir('./baseline_weights/' + str(val[0]))
-                
+
                 if self.debug:
                     print("weight folder:     ", folder)
-                
+
                 weight_file = fnmatch.filter(folder, '*endweights')
                 weight_file = weight_file[0]
-                
+
                 if self.debug:
                     print("Weight file:     ", weight_file)
-                
+
                 self.baseline_policies[key] = PPO(self.num_inputs, self.num_outputs)
                 full_weight_file = './baseline_weights/' + str(val[0]) + '/' + weight_file
                 self.baseline_policies[key].load_weights(full_weight_file)
-                
+
             if self.debug:
                 print("Imported Policies:\n")
                 for mod, policy in self.baseline_policies.items():
                     print("Modification:    ", mod)
                     print(policy.model)
-                    
+
             self.baseline_policy_list = self.baseline_policies.values()
-        
+
     # def uniform_action(self, state):
     #     """ Outputs a uniform average of actions from variable number of policies"""
     #     num_policies = len(self.policy_list)
@@ -154,7 +154,7 @@ class ensemble():
 
                 print("ensemble weights:")
                 print(policy_weights, policy_weights.size())
-                
+
                 print("baseline action:")
                 print(base_action, base_action.size())
                 print("compensator action:")
@@ -171,8 +171,8 @@ class ensemble():
                 print("length ", policy_weights.shape[1])
                 print("policy list:    ", self.baseline_policy_list)
                 print("length: ", len(self.baseline_policy_list))
-                return 
-            
+                return
+
             if self.debug:
                 print("weights:    ", policy_weights)
                 print("length ", policy_weights.shape[1])
@@ -184,7 +184,7 @@ class ensemble():
                     actions = policy.model.sample_action(state)
                 else:
                     actions = torch.cat((actions, policy.model.sample_action(state)), 2)
-                
+
             actions = actions.squeeze(0)
 
             if self.debug:
@@ -192,7 +192,7 @@ class ensemble():
                 print(actions, actions.size())
                 print("ensemble weights:")
                 print(policy_weights, policy_weights.size())
-            
+
             action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
             if self.debug:
                 print("action:")
@@ -203,8 +203,8 @@ class ensemble():
 class PPO_Ensemble(PPO):
     def __init__(self, num_inputs, num_outputs, ensemble, hidden_size=64, lr=3e-4, num_steps=2048,
                  mini_batch_size=64, ppo_epochs=10, threshold_reward=950):
-        super().__init__(num_inputs, num_outputs, hidden_size=hidden_size, lr=3e-4, num_steps=2048,
-                         mini_batch_size=64, ppo_epochs=10, threshold_reward=950)
+        super().__init__(num_inputs, num_outputs, hidden_size=hidden_size, lr=lr, num_steps=num_steps,
+                         mini_batch_size=64, ppo_epochs=ppo_epochs, threshold_reward=threshold_reward)
         self.ensemble = ensemble
 
     def collect_data(self, envs):
