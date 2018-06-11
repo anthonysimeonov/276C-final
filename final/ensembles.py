@@ -203,7 +203,7 @@ class ensemble():
 class PPO_Ensemble(PPO):
     def __init__(self, num_inputs, num_outputs, ensemble, hidden_size=64, lr=3e-4, num_steps=2048,
                  mini_batch_size=64, ppo_epochs=10, threshold_reward=950):
-        super().__init__(num_inputs, num_outputs, hidden_size=64, lr=3e-4, num_steps=2048,
+        super().__init__(num_inputs, num_outputs, hidden_size=hidden_size, lr=3e-4, num_steps=2048,
                          mini_batch_size=64, ppo_epochs=10, threshold_reward=950)
         self.ensemble = ensemble
 
