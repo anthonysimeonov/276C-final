@@ -198,3 +198,37 @@ class ensemble():
                 print("action:")
                 print(action, action.size())
             return action
+
+
+class ensemble_testing_envs(testing_envs):
+    def __init__(self, env_names, VISUALIZE, COMPENSATION, results_dir, train_env_index, logging_interval=10):
+        super().__init__(env_names, VISUALIZE, COMPENSATION,
+                         results_dir, train_env_index, logging_interval=10)
+
+    def test_env(self, env, ensemble_net, weight_net, comp_model=None):
+
+        def test_action(state):
+            dist, value = weight_net.model(state)
+            weights = dist.sample()
+            action = ensemble_net.weighted_action(state.cpu().numpy(), weights)
+            return action
+
+        state = env.reset()
+        if self.vis:
+            env.render()
+        done = False
+        total_reward = 0
+        while not done:
+            state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            sample = test_action(state)
+
+            #state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            #dist, _ = control_model(state)
+            #sample = dist.sample().cpu().numpy()[0]
+
+            next_state, reward, done, _ = env.step(sample.cpu().numpy())
+            state = next_state
+            if self.vis:
+                env.render()
+            total_reward += reward
+        return total_reward
