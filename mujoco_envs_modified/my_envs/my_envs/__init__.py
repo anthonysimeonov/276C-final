@@ -147,3 +147,65 @@ register(
     max_episode_steps=1000,
     reward_threshold=4800,
 )
+
+
+
+
+
+
+
+register(
+    id='HalfCheetahModified-base-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedBaseEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-multi-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedMultiEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-mass-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedMassEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-motor-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedMotorEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-jointfriction-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedJointFrictionEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-groundfriction-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedGroundFrictionEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-damping-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedDampingEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
+
+register(
+    id='HalfCheetahModified-stiffness-v13',
+    entry_point='my_envs.envs:HalfCheetahModifiedStiffnessEnv131',
+    max_episode_steps=1000,
+    reward_threshold=4800,
+)
