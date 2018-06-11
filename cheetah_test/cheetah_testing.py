@@ -4,13 +4,13 @@
 # # Baseline PPO Controller
 # Train a PPO baseline policy.
 # ### Environments:
-# 
-# #### InvertedPendulum-v2 environment:  
+#
+# #### InvertedPendulum-v2 environment:
 # <img src="./notebookImages/invertedpendulum.png" width="300">
-# 
+#
 # #### Halfcheetah-v2 environment:
 # <img src="./notebookImages/halfcheetah.png" width="300">
-# 
+#
 # #### Ant environment:
 # <img src="./notebookImages/ant.png" width="300">
 
@@ -74,7 +74,7 @@ def make_env(env_name):
 # In[4]:
 
 
-VISUALIZE = True #Flag to save videos
+VISUALIZE = False #Flag to save videos
 logging_interval = 10 #Freqeuncy of video saving
 COMPENSATION = False #Flag to implement compensation in test function
 EARLY_STOPPING = True #Flag to stop when reward reaches threshold
@@ -124,21 +124,21 @@ for env_name in test_env_names:
     time_stamp = datetime.datetime.now().replace(microsecond=0).isoformat()
     results_dir = os.path.join(script_dir, 'baseline_plots/' + env_name + time_stamp + '/')
     baseline_dir = os.path.join(script_dir, 'baseline_weights/' + env_name + time_stamp + '/')
-    
+
 
     print(script_dir)
     print(time_stamp)
     print(results_dir)
     print(baseline_dir)
 
-    
+
 
     if not os.path.isdir(results_dir):
         os.mkdir(results_dir)
-        
+
     if not os.path.isdir(baseline_dir):
         os.mkdir(baseline_dir)
-        
+
     #Testing on original and new envs
     tests = testing_envs(test_env_names, VISUALIZE, COMPENSATION, results_dir, training_env_index, logging_interval = 10)
 
@@ -160,14 +160,14 @@ for env_name in test_env_names:
     threshold_reward = 1500
 
     #PPO object
-    ppo_baseline = PPO(num_inputs, 
-                       num_outputs, 
-                       hidden_size=hidden_size, 
+    ppo_baseline = PPO(num_inputs,
+                       num_outputs,
+                       hidden_size=hidden_size,
                        num_steps=num_steps,
                        threshold_reward=threshold_reward
                       )
 
-    ppo_baseline.load_weights('/home/daniel/Desktop/cheetah_test/HalfCheetahBase_1e6_PPO.pt')
+    ppo_baseline.load_weights('HalfCheetahBase_1e6_PPO.pt')
 
     # In[7]:
 
@@ -175,7 +175,7 @@ for env_name in test_env_names:
     max_frames = 30000
     test_avg_rewards = []
     test_stds = []
-    test_itrs = 1
+    test_itrs = 20
     save_interval = 5 #How often to save weights and figures
 
 
@@ -194,17 +194,17 @@ for env_name in test_env_names:
 
         #collect data
         log_probs, values, states, actions, rewards, masks, next_value = ppo_baseline.collect_data(envs)
-        
+
         #compute gae
         returns = ppo_baseline.compute_gae(next_value, rewards, masks, values)
-        
+
         #update policy
         #ppo_baseline.ppo_update(ppo_epochs, mini_batch_size, states, actions, log_probs, returns, values)
-        
+
         #plot
         avg_rew = []
         std = []
-        
+
         #Environment testing and data logging
         #***************************************************************************************
         for env in tests.envs:
@@ -224,7 +224,7 @@ for env_name in test_env_names:
                 tests.plot(ppo_baseline.frame_idx, test_avg_rewards, test_stds, which_plts, 1, str(ppo_updates/save_interval))
             else:
                 tests.plot(ppo_baseline.frame_idx, test_avg_rewards, test_stds, which_plts, 0)
-                
+
         ppo_updates = ppo_updates + 1 #Loop counter
         #***************************************************************************************
 
