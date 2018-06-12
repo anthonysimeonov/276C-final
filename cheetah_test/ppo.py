@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.distributions import Normal
+import time
 
 import numpy as np
 
@@ -295,6 +296,7 @@ class testing_envs():
         state = env.reset()
         if self.vis:
             env.render()
+            time.sleep(0.01)
         done = False
         total_reward = 0
         while not done:
@@ -309,6 +311,7 @@ class testing_envs():
             state = next_state
             if self.vis:
                 env.render()
+                time.sleep(0.01)
             total_reward += reward
         return total_reward
 
