@@ -29,6 +29,6 @@
 		</body>
 	</worldbody>
 	<actuator>
-		<motor gear="40" joint="slider" name="slide"/>
+		<motor gear="35" joint="slider" name="slide"/>
 	</actuator>
 </mujoco>
