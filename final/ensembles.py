@@ -279,9 +279,9 @@ class ensemble_testing_envs(testing_envs):
         total_reward = 0
         while not done:
             state = torch.FloatTensor(state).unsqueeze(0).to(device)
-            if action_append:
-                base_action = self.ensemble_net.baseline_policies['base'].model.sample_action(state.cpu().numpy()).squeeze(0)
-                state = torch.cat((state, base_action), dim=1)
+#             if action_append:
+#                 base_action = self.ensemble_net.baseline_policies['base'].model.sample_action(state.cpu().numpy()).squeeze(0)
+#                 state = torch.cat((state, base_action), dim=1)
 
             sample = test_action(state)
 
