@@ -65,7 +65,7 @@ class ensemble():
                 if self.debug:
                     print("Weight file:     ", weight_file)
 
-                self.compensator_policies[key] = PPO(self.num_inputs, self.num_outputs)
+                self.compensator_policies[key] = PPO(self.num_inputs + self.num_outputs, self.num_outputs)  #inputs = dim(state) + dim(action)
                 full_weight_file = './compensator_weights/' + str(val[0]) + '/' + weight_file
                 self.compensator_policies[key].load_weights(full_weight_file)
 
@@ -133,6 +133,7 @@ class ensemble():
                 return
 
             base_action = self.baseline_policies['base'].model.sample_action(state).squeeze(0)
+            state = np.hstack((state, base_action.cpu().numpy()))
             for i, policy in enumerate(self.compensator_policy_list):
                 if i == 0:
                     actions = policy.model.sample_action(state)
@@ -202,10 +203,11 @@ class ensemble():
 
 class PPO_Ensemble(PPO):
     def __init__(self, num_inputs, num_outputs, ensemble, hidden_size=64, lr=3e-4, num_steps=2048,
-                 mini_batch_size=64, ppo_epochs=10, threshold_reward=950):
+                 mini_batch_size=64, ppo_epochs=10, threshold_reward=950, action_appended=False):
         super().__init__(num_inputs, num_outputs, hidden_size=hidden_size, lr=lr, num_steps=num_steps,
-                         mini_batch_size=64, ppo_epochs=ppo_epochs, threshold_reward=threshold_reward)
+                         mini_batch_size=mini_batch_size, ppo_epochs=ppo_epochs, threshold_reward=threshold_reward)
         self.ensemble = ensemble
+        self.action_appended = action_appended
 
     def collect_data(self, envs):
         if self.state is None:
@@ -225,6 +227,12 @@ class PPO_Ensemble(PPO):
 
         for _ in range(self.num_steps):
             state = torch.FloatTensor(state).to(device)
+
+            if self.action_appended:
+                base_action = self.ensemble.baseline_policies['base'].model.sample_action(state.cpu().numpy()).squeeze(0)
+                state = torch.cat((state, base_action), dim=1)
+                print("action concatenated state:", state)
+
             dist, value = self.model(state)
 
             weights = dist.sample()
@@ -256,7 +264,7 @@ class ensemble_testing_envs(testing_envs):
         super().__init__(env_names, VISUALIZE, COMPENSATION,
                          results_dir, train_env_index, logging_interval=10)
 
-    def test_env(self, env, ensemble_net, weight_net, comp_model=None):
+    def test_env(self, env, ensemble_net, weight_net, action_append=False, comp_model=None):
 
         def test_action(state):
             dist, value = weight_net.model(state)
@@ -271,6 +279,10 @@ class ensemble_testing_envs(testing_envs):
         total_reward = 0
         while not done:
             state = torch.FloatTensor(state).unsqueeze(0).to(device)
+            if action_append:
+                base_action = self.ensemble_net.baseline_policies['base'].model.sample_action(state.cpu().numpy()).squeeze(0)
+                state = torch.cat((state, base_action), dim=1)
+
             sample = test_action(state)
 
             #state = torch.FloatTensor(state).unsqueeze(0).to(device)
