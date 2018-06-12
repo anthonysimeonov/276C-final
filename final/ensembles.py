@@ -141,7 +141,16 @@ class ensemble():
                     actions = torch.cat((actions, policy.model.sample_action(state)), 2)
 
             actions = actions.squeeze(0)
-            comp_action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
+            action_dim = actions.size()[1]/policy_weights.size()[1]
+            policy_weights_tiled = policy_weights.view(-1, 1).repeat(1, action_dim).view(policy_weights.size()[0], policy_weights.size()[1]*action_dim)
+            if self.debug:
+                print("baseline action:")
+                print(base_action, base_action.size())
+                print("action tensor:")
+                print(actions, actions.size())
+                
+#             comp_action = torch.sum((actions * policy_weights), dim=1).unsqueeze(1)
+            comp_action = torch.sum((actions * policy_weights_tiled), dim=1).unsqueeze(1)
             action = base_action + comp_action
 
             if self.debug:

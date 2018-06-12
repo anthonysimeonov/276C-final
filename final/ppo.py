@@ -175,8 +175,8 @@ class ActorCritic(nn.Module):
 
     def init_weights(self, m):
         if isinstance(m, nn.Linear):
-            nn.init.normal_(m.weight, mean=0., std=0.1)
-            nn.init.constant_(m.bias, 0.1)
+            nn.init.normal_(m.weight, mean=0., std=0.01)
+            nn.init.constant_(m.bias, 0.01)
 
     def sample_action(self, state):
             state = torch.FloatTensor(state).unsqueeze(0).to(device)
