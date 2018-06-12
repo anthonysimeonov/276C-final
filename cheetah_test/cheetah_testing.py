@@ -175,7 +175,7 @@ for env_name in test_env_names:
     max_frames = 30000
     test_avg_rewards = []
     test_stds = []
-    test_itrs = 20
+    test_itrs = 10
     save_interval = 5 #How often to save weights and figures
 
 
@@ -208,6 +208,9 @@ for env_name in test_env_names:
         #Environment testing and data logging
         #***************************************************************************************
         for env in tests.envs:
+            print("\n\n\n")
+            print(env)
+            print("\n\n\n")
             env_rewards = ([tests.test_env(env, ppo_baseline.model) for _ in range(test_itrs)])
             avg_rew.append(np.mean(env_rewards))
             std.append(np.std(env_rewards))

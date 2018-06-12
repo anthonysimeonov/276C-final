@@ -70,7 +70,7 @@ class HalfCheetahModifiedMultiEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
 class HalfCheetahModifiedDampingEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
-        mujoco_env.MujocoEnv.__init__(self, xml_directory + 'half_cheetah_modified_mass.xml', 5)
+        mujoco_env.MujocoEnv.__init__(self, xml_directory + 'half_cheetah_modified_damping.xml', 5)
         utils.EzPickle.__init__(self)
 
     def step(self, action):
