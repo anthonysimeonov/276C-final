@@ -79,6 +79,13 @@ id='InvertedPendulumModified-multi-v10',
 )
 
 register(
+id='InvertedPendulumModified-multi2-v10',
+    entry_point='my_envs.envs:InvertedPendulumModifiedMultiEnv2',
+    max_episode_steps=1000,
+    reward_threshold=950,
+)
+
+register(
     id='AntModified-base-v11',
     entry_point='my_envs.envs:AntModifiedBaseEnv',
     max_episode_steps=1000,
