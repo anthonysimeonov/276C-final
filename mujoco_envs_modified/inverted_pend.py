@@ -32,7 +32,7 @@ MODEL_XML = """
       <inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
 			<joint axis="1 0 0" limited="true" name="slider" pos="0 0 0" range="-1 1" frictionloss="0" type="slide"/>
 			<!--geom name="cart" pos="0 0 0" quat="0.707 0 0.707 0" size="0.1 0.1" type="capsule"/-->
-			<geom name="cart" pos="0 0 0" quat="0.6 0.7 0.9 0" size="0.1 0.1" type="capsule"/>
+			<geom name="cart" pos="0 0 0" quat="0.707 0 0.707 0" size="0.1 0.1" type="capsule"/>
 			<body name="pole" pos="0 0 0">
 				<inertial pos="0 0 0" mass="1" diaginertia="1 1 1"/>
 				<joint axis="0 1 0" name="hinge" pos="0 0 0" range="-90 90" frictionloss="0" type="hinge"/>
@@ -61,6 +61,8 @@ viewer = MjViewer(sim)
 
 
 while True:
+	time.sleep(5)
+
 	action = (env.action_space.sample())
 
 	sim.data.ctrl[0] = action[0]
